@@ -202,6 +202,27 @@ def delete_negative_comment(insta_username):
     else:
         print 'Status code other than 200 received!'
 
+# function to get list of users who like user's media
+def get_like_list(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + 'media/%s/likes?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
+    # Printing the url that is being called/requested
+
+    print 'GET request url : %s' % (request_url)
+    like_list = requests.get(request_url).json()
+    print like_list
+
+    if like_list['meta']['code'] == 200:
+        if len(like_list['data']):
+            for i in range(0, len(like_list['data'])):
+                print 'Username: %s' % (like_list['data'][i]['username'])
+
+        else:
+            print 'There is no like for this user media!'
+    else:
+        print 'Query was unsuccessful!'
+
+
 #This function depicts the values of various object in an image..
 def image_depiction(insta_username):
     user_id = get_user_id(insta_username)
@@ -329,9 +350,10 @@ def start_bot():
         print "e.Like the recent post of a user\n"
         print "f.Make a comment on the recent post of a user\n"
         print "g.Delete negative comments from the recent post of a user\n"
-        print "h.Image Depiction\n"
-        print "i.For Marketing over Instagram\n"
-        print "j.Exit"
+        print "h.Get a list of people who have liked the recent post of a user\n"
+        print "i.Image Depiction\n"
+        print "j.For Marketing over Instagram\n"
+        print "k.Exit"
 
         choice = raw_input("Enter you choice: ")
         if choice == "a":
@@ -355,13 +377,16 @@ def start_bot():
            delete_negative_comment(insta_username)
         elif choice == "h":
             insta_username = raw_input("Enter the username of the user: ")
-            image_depiction(insta_username)
+            get_like_list(insta_username)
         elif choice == "i":
+            insta_username = raw_input("Enter the username of the user: ")
+            image_depiction(insta_username)
+        elif choice == "j":
             insta_keyword = raw_input("Enter the keyword to be searched :")
             insta_promotional_message = raw_input("Enter the text to be commented :")
             insta_username = raw_input("Enter the username :")
             insta_marketing(insta_keyword, insta_promotional_message, insta_username)
-        elif choice == "j":
+        elif choice == "k":
             exit()
         else:
             print "wrong choice"
