@@ -202,6 +202,7 @@ def delete_negative_comment(insta_username):
     else:
         print 'Status code other than 200 received!'
 
+#This function depicts the values of various object in an image..
 def image_depiction(insta_username):
     user_id = get_user_id(insta_username)
     if user_id == None:
@@ -224,8 +225,96 @@ def image_depiction(insta_username):
             print 'Post does not exist!'
     else:
         print 'Status code other than 200 received!'
-    
 
+# Function to post the promotional message...
+def post_promotional_comment(insta_promotional_message, insta_username):
+    # Fetching recent media id
+    media_id = get_post_id(insta_username)
+    payload = {"access_token": APP_ACCESS_TOKEN, "text": insta_promotional_message}
+    request_url = (BASE_URL + 'media/%s/comments') % (media_id)
+    # Printing the url that is being called/requested
+    print 'POST request url : %s' % (request_url)
+
+    # Commenting the
+    make_comment = requests.post(request_url, payload).json()
+
+    if make_comment['meta']['code'] == 200:
+        print "Successfully added a promotional comment!"
+    else:
+        print "Unable to add comment. Try again!"
+
+
+#function to do Marketing on Instagram..
+def insta_marketing(insta_keyword,insta_promotional_message,insta_username):
+    # Analyze comments
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
+    # Printing the url that is being called/requested
+    print 'GET request url : %s' % (request_url)
+    comment_info = requests.get(request_url).json()
+    print comment_info
+    if comment_info['meta']['code'] == 200:
+
+        if len(comment_info['data']):
+
+            for index_var in range(0, len(comment_info['data'])):
+                comment_text = comment_info['data'][index_var]['text']
+                print comment_text
+                comment_words = comment_text.split()
+                print comment_words
+                for i in range(0,comment_words.__len__()):
+                    if(comment_words[i] == insta_keyword):
+                        post_promotional_comment(insta_promotional_message,insta_username)
+                        break
+    else:
+        print 'Status code other than 200 received'
+
+    # Analyze tags
+    request_url = (BASE_URL+'media/%s?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
+    # Printing the url that is being called/requested
+    print 'GET request url : %s' % (request_url)
+    media_data=requests.get(request_url).json()
+
+    if(media_data) is not None:
+
+        print media_data
+
+        if (media_data['meta']['code']== 200):
+
+            if len(media_data['data']['tags']):
+                # Fetching the tags on a post
+                insta_tag = media_data['data']['tags']
+                for index_var in range(0,insta_tag.__len__()):
+                    if insta_tag[index_var]==insta_keyword:
+                        print insta_tag[index_var]
+                        post_promotional_comment(insta_promotional_message,insta_username)
+                        break
+                    else:
+                        print 'Not matched'
+            else:
+                print 'No tags'
+
+    #Analyzing Caption
+
+            if (media_data['data']['caption']) is not None:
+            # Fetching the captions on a post
+                insta_caption = media_data['data']['caption']['text']
+                type(insta_caption)
+                insta_caption_words = insta_caption.split()
+
+                for p in range(0, insta_caption_words.__len__()):
+                    if (insta_caption_words[p] == insta_keyword):
+                        print insta_caption_words[p]
+                        post_promotional_comment(insta_promotional_message, insta_username)
+                        break
+                    else:
+                        print 'Not matched'
+            else:
+                print 'No caption'
+        else:
+            print 'Status code other than 200 received'
+    else:
+        print 'Media Does not Exist'
 
 
 def start_bot():
@@ -241,7 +330,8 @@ def start_bot():
         print "f.Make a comment on the recent post of a user\n"
         print "g.Delete negative comments from the recent post of a user\n"
         print "h.Image Depiction\n"
-        print "i.Exit"
+        print "i.For Marketing over Instagram\n"
+        print "j.Exit"
 
         choice = raw_input("Enter you choice: ")
         if choice == "a":
@@ -266,8 +356,12 @@ def start_bot():
         elif choice == "h":
             insta_username = raw_input("Enter the username of the user: ")
             image_depiction(insta_username)
-
         elif choice == "i":
+            insta_keyword = raw_input("Enter the keyword to be searched :")
+            insta_promotional_message = raw_input("Enter the text to be commented :")
+            insta_username = raw_input("Enter the username :")
+            insta_marketing(insta_keyword, insta_promotional_message, insta_username)
+        elif choice == "j":
             exit()
         else:
             print "wrong choice"
